@@ -38,7 +38,7 @@
 	\end{center}
 	
 	
-	\section{Постановка задачи}
+	\section{Линейная регрессия}
 	
 	
 	\begin{frame}
@@ -54,6 +54,9 @@
 		\centering
 		\includegraphics[width=0.7\textwidth]{img/regr_ex.png}
 	\end{frame}
+	
+	
+	\subsection{МНК}
 	
 	
 	\begin{frame}
@@ -95,7 +98,7 @@
 		Частный случай, когда $a(x, \theta)$ линейна по своим параметрам - \textbf{линейная регрессия}
 		
 		$$
-		a(x) = \omega_0 + \sum_{j=1}^{n} \omega_j x_j = 
+		a(x, \omega) = \omega_0 + \sum_{j=1}^{n} \omega_j x_j = 
 		\omega_0 + \langle \omega, x\rangle 
 		$$
 		Определяется вектором коэффициентов $\omega = (\omega_1, ..., \omega_n) \in \mathbb{R}^{n}$ и свободным членом $\omega_0 \in \mathbb{R}$
@@ -129,6 +132,9 @@
 		$$ \omega^{*} = (X^{T}X)^{-1} X^{T} y $$
 	\end{frame}
 
+
+	\subsection{Мультиколлинеарность}
+	
 	
 	\begin{frame}
 		\frametitle{Проблема линейной зависимости признаков}
@@ -170,6 +176,10 @@
 		\end{itemize}
 	\end{frame}
 	
+	
+	\subsection{Регуляризация}
+	
+	
 	\begin{frame}
 		\frametitle{Квадратичная регуляризация - гребневая регрессия}
 		\textbf{Метод гребневой регрессии} (Ridge regression) состоит в добавлении слагаемого, штрафующего за большие веса:
@@ -202,56 +212,115 @@
 		
 		параметр $\beta$ - селективность.
 		
-		\vspace{15pt}
+		
+		Альтернативная формулировка метода:
+		
+		\[
+		Q(\theta) = \|X\omega - y\|^{2} + \beta \|\omega\|_{1} \rightarrow \min_{\omega}
+		\] 
 		
 		Особенность метода состоит в умении отбирать признаки. С уменьшением параметра $\beta$ становится "выгоднее" \textbf{занулять некоторые веса}.
 	\end{frame}
 	
 	
 	\begin{frame}
-		\frametitle{Влияние }
+		\frametitle{Эффект от регуляризации}
+		\begin{figure}[h]
+			% for webp format:$ dwebp image.webp -o image.png
+			\includegraphics[width=\paperwidth, ]{img/l1_l2_regul.png}
+		\end{figure}
 	\end{frame}
 	
 	
-%%%%%%%%%%%%%%%
-	\begin{frame}
-		\frametitle{МНК в случае линейной модели}
-		
-		\begin{itemize}
-			\item Модель регрессии - линейная, $a(x) = \langle \omega, x \rangle$
-			\item Функция потерь - квадратичная, $\mathcal{L}(a, x_i) = (a(x_i) - y_i)^{2}$
-			\item Метод обучения - минимизация среднего риска, 
-			$Q(\omega) = \sum_{i=1}^{\ell} (a(x_i, \omega) - y_i)^{2} \to \min\limits_{\omega}$
-			%\item Проверка по тестовой выборке $X^{'} = (x_i^{'}, y_i^{'})_{i=1}^{k}]$
-		\end{itemize}
 	
-		\vspace{15pt}
-		
-		В матричном виде:
-		
-		$$
-		Q(\omega) = \frac{1}{\ell} \|X\omega - y\|^{2} \to \min_{\omega}
-		$$
-	\end{frame}
-
-
+	\section{Нелинейные обобщения}
+	
+	\subsection{Преобразования признаков}
+	
 	\begin{frame}
-		\frametitle{Точное аналитическое решение}
-		Задача имеет точное аналитическое решение:
-		$$
-		\omega = (X^{T} X)^{-1} X^{T}y
-		$$
+		\frametitle{Нелинейные преобразования признаков}
+		Можно перейти от исходного признакового описания $x = (x_1, ..., x_n)$  к новым признакам $g(x) = (g_1(x), ..., g_m(x))$.
 		
 		\vspace{15pt}
 		
-		Недостатки аналитического решения:
+		Например, вместо сложной модели (нелинейной по признакам)
+		$a(x, \omega) = \omega_1 \ln(x_1) + \omega_2 \exp(x_2) + \omega_3 \frac{x_1}{x_2}$
+		
+		можно перейти к новому признаковому описанию $x^{'} = g(x)$, $g(x) = (\ln(x_1), \exp(x_2), \frac{x_1}{x_2})$.
+		И тогда $a(x^{'}, \omega) = \omega_1 x_1^{'} + \omega_2 x_2^{'} + \omega_3 x_3^{'} = \langle w, x^{'} \rangle$ - линейная модель и по признакам, и по весам.
+	\end{frame}
+	
+	\subsection{Нелинейная модель}
+	
+	\begin{frame}
+		\frametitle{Нелинейная модель регрессии}
+		Случай нелинейной модели $a(x, \omega)$ \textbf{по своим параметрам} $\omega$. Другими словами, модель нельзя представить скалярным произведением: $a(x, \omega) \ne \langle \omega, g(x) \rangle$ , где $g(x)$ - некоторое преобразование признаков, $g: \mathbb{R}^n \rightarrow \mathbb{R}^m$.
+		
+		\vspace{15pt}
+		
+		Примеры:
 		\begin{itemize}
-			\item Обращение матрицы $(X^{T} X)^{-1}$: в случае плохо обусловленной матрицы веса неустойчивы и очень большие по модулю. Для вырожденной матрица - обращение невозможно.
-			\item Вычислительная сложность - $O(n^{2}\ell + n^{3})$
+			\item $a(x, \omega) = x^{\omega}$ - нелинейная
+			\item $a(x, \omega) = \sin(x_1 \omega_1) + \cos(x_2 \omega_2)$ - нелинейная
+			\item $a(x, \omega) = \omega_1 \ln(x_1) + \omega_2 \exp(x_2)$ - \textbf{линейная}
 		\end{itemize}
 	\end{frame}
-
-
+	
+	
+	\begin{frame}
+		\frametitle{Обобщенные линейные модели}
+		Огромный класс моделей образуют Обобщенные линейные модели (\textbf{GLM}, Generalized linear Models).
+		
+		\vspace{5pt}
+		
+		Идея в том, что модель регрессии линейна, но задана нелинейная функция связи $h(\cdot)$ между результатом модели и целевой переменной.
+		
+		\[
+		a(x, \omega) = h(\langle \omega, x \rangle)
+		\]
+	\end{frame}
+	
+	\subsection{Другие функция потерь}
+	
+	\begin{frame}
+		\frametitle{Другие функция потерь}
+		Квадратичная функции потерь $\mathcal{L}(a, y) = (a(x) - y)^2$ соответствует методу наименьших квадратов. 
+		
+		\vspace{5pt}
+		
+		\begin{itemize}
+			\item $\mathcal{L}(a, y) = |a(x) - y|$ - линейная
+			\item $\mathcal{L}(a, y) = [a(x) \ne y]$ - 0-1 функция
+			\item $\mathcal{L}(a, y) = \ln(1 + e^{- a(x) y})$ - логистическая
+			\item $\mathcal{L}(a, y) = \max(0, 1 - a(x) y)$ - Hinge loss
+		\end{itemize}
+		
+		\vspace{5pt}
+		
+		Необходимо подбирать функцию потерь которая лучшим образом описывающую бизнес требования задачи.
+	\end{frame}
+	
+	
+	\section{Градиентные методы оптимизации}
+	
+	
+	\begin{frame}
+		\frametitle{Решение задачи оптимизации}
+		В случае не квадратичной функции потерь или нелинейной модели регрессии решение ищут численными методами.
+		
+		\[
+		Q(a, X) = \sum_{i=1}^{\ell} \mathcal{L}(a(x_i, \omega), y_i) \rightarrow \min
+		\]
+		
+		
+		Вектор частных производных (градиент) по параметрам в общем виде :
+	
+		\[
+		\frac{\partial Q}{\partial \omega_j} = \sum_{i=1}^{\ell} \frac{\partial \mathcal{L}}{\partial a} \cdot \frac{\partial a}{\partial \omega_j}
+		\]
+	\end{frame}
+	
+	
 	\begin{frame}
 		\frametitle{Численное решение}
 		Наиболее простой и подходящий класс методов -- \textbf{градиентные методы оптимизации}.
@@ -265,27 +334,24 @@
 		
 		Общая схема:
 		$$
-		Q(\omega) = \frac{1}{\ell} \sum_{i=1}^{\ell} \mathcal{L}_{i}(\omega) \to \min_{\omega}
+		Q(\omega) = \sum_{i=1}^{\ell} \mathcal{L}_{i}(\omega) \to \min_{\omega}
 		$$
 		
 		$$
 		\omega^{(t + 1)} = \omega^{(t)} - \alpha \cdot \nabla_{\omega} Q(\omega^{(t)})
 		$$
-		где $a \in \mathbb{R}$ - некоторый параметр (размер шага)
+		где $\alpha \in \mathbb{R}$ - некоторый параметр (размер шага)
 		
 		\vspace{5pt}
-
+		
 		Градиент квадратичного функционала:
 		
 		$$
-		\nabla_{\omega} Q = \frac{2}{\ell} X^{T}(X\omega - y)
+		\nabla_{\omega} Q = 2 X^{T}(X\omega - y)
 		$$
 	\end{frame}
 
 
-	\section{Градиентные методы}
-
-	
 	\begin{frame}
 		\frametitle{Метод градиентного спуска}
 		
@@ -314,8 +380,8 @@
 			
 		\end{algorithm}
 	\end{frame}
-
-	 
+	
+	
 	\begin{frame}
 		\frametitle{Идея ускорения алгоритма}
 		Градиент $\nabla Q(\omega)$ представим в виде суммы градиентов:
@@ -365,34 +431,9 @@
 		\end{algorithm}
 	\end{frame}
 	
+	% оставлю на потом	
+	\section{Вероятностная постановка задачи}
 	
-	\begin{frame}
-		\frametitle{Другие популярные градиентные методы}
-		\begin{itemize}
-			\item SAG
-			\item Метод инерции (momentum)
-			\item AdaGrad, RMSprop			
-			\item Adam
-			\
-		\end{itemize}
-	\end{frame}
-	
-	
-	\section{Регуляризация}
-	
-	
-	\begin{frame}
-		\frametitle{}
-		
-	\end{frame}
 
 
-	\section[Нелинейный случай]{Обобщение на нелинейный случай}
-	
-	
-	\begin{frame}
-		\frametitle{}
-		
-	\end{frame}
-	
 \end{document}
