@@ -133,6 +133,41 @@
 	\end{frame}
 
 
+	\subsection{Теорема Гаусса-Маркова}
+
+
+	\begin{frame}
+		\frametitle{Теорема Гаусса-Маркова}
+		\textbf{Если} целевая переменная описывается $y = X\omega + \epsilon$ и:
+		\begin{enumerate}
+			\item $X$ - детерминированная матрица
+			\item $E\{\epsilon\} = 0$
+			\item $Var\{\epsilon\} = \sigma^2$ - гомоскедантичность
+			\item $Cov(\epsilon_i, \epsilon_j) = 0, i \ne j$ - некоррелированность остатков
+			\item $det(X) \ne 0$ - невырожденная матрица
+		\end{enumerate}
+		
+		\vspace{5pt}
+		
+		\textbf{То} МНК оценка $\omega^{*}$ является \textbf{BLUE} (Best Linear Unbiased Estimate) - обладает наименьшей дисперсией среди всех линейных несмешенных оценок $\omega$
+	\end{frame}		
+
+
+	\begin{frame}
+		\frametitle{Случай нормального шума}
+		В случае, когда $\epsilon \sim N(0, \sigma^2)$, МНК оценка $\omega^{*}$ будет являться эффективной среди \textbf{всех несмещенных оценок}.
+		
+		\vspace{15pt}
+		
+		Также метод наименьших квадратов будет совпадать с методом максимального правдоподобия MLE (Maximum Likelihood Estimate).
+		$y = X\omega + \epsilon$
+		
+		\[
+		\epsilon = (y - X\omega) \sim N(0, \sigma^2)
+		\]
+	\end{frame}
+	
+	
 	\subsection{Мультиколлинеарность}
 	
 	
@@ -352,6 +387,9 @@
 	\end{frame}
 
 
+	\subsection{Метод градиентного спуска}
+
+
 	\begin{frame}
 		\frametitle{Метод градиентного спуска}
 		
@@ -398,6 +436,9 @@
 	\end{frame}
 	
 	
+	\subsection{Метод стохастического градиента}
+	
+	
 	\begin{frame}
 		\frametitle{Метод стохастического градиента}
 		% \includegraphics[width=\linewidth]{img/stoch_grad.png}
@@ -432,7 +473,20 @@
 	\end{frame}
 	
 	% оставлю на потом	
-	\section{Вероятностная постановка задачи}
+	%\section{Вероятностная постановка задачи}
+	
+	\section*{Резюме}
+	
+	
+	\begin{frame}
+		\frametitle{Резюме}
+		\begin{enumerate}
+			\item Класс линейных моделей хорошо изучен
+			\item Модели интерпретиреумы
+			\item Страдают от линейной зависимости признаков
+			\item МНК для линейной модели  с $L2$ регуляризацией имеет аналитическое решение
+		\end{enumerate}
+	\end{frame}
 	
 
 
