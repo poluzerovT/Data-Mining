@@ -1,0 +1,161 @@
+% presentation
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+
+% rus lang
+\usepackage[main=russian,english]{babel}
+
+% insert images
+\usepackage{wrapfig}
+
+% declare operator
+\DeclareMathOperator*{\argmin}{argmin} % thin space, limits underneath in displays
+\newcommand{\at}[2][]{#1|_{#2}}
+
+% alrorithm
+\usepackage{algorithm2e}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+% \usepackage{algorithmic}
+
+\title[Классификация]{Лекция 3. Классификация}
+\subtitle{Основы интеллектуального анализа данных}
+\author{Полузёров Т. Д.}
+\institute{БГУ ФПМИ}
+\date{}
+
+\begin{document}
+	
+	\begin{frame}
+		\titlepage
+	\end{frame}
+	
+	\begin{center}
+		\frametitle{Структура лекции}
+		\tableofcontents	
+	\end{center}
+	
+	\section{Байесовские методы}
+	
+	\begin{frame}
+		\frametitle{Вероятностная постановка задачи}
+		 $\mathbb{X}$ - множество объектов, $\mathbb{Y}$ - множество классов.
+		 
+		$(\mathbb{X} \times \mathbb{Y})$ - вероятностное пространство с совместной плотностью $p(x, y) = P(y) p(x | y)$
+		 
+		$P_y := P(y)$ - \textbf{априорные вероятности} классов (prior)
+		
+		$p_y(x) := p(x | y)$ - \textbf{функции правдоподобия} классов (likelihood)
+		
+		\vspace{15pt}
+		
+		Задачи:
+		
+		\begin{enumerate}
+			\item По выборке $(X, Y) \in (\mathbb{X}, \mathbb{Y})$ построить оценки распределений $\hat{P_y}$ и $\hat{p_y(x)}$
+			\item По известным распределениям $p_y(x)$ и $P_y$ построить алгоритм $a: \mathbb{X} \rightarrow \mathbb{Y}$ минимизирующий вероятность ошибочной классификации
+		\end{enumerate}
+	\end{frame}
+	
+	\subsection{Оптимальный классификатор}
+	
+	\begin{frame}
+		\frametitle{Функционал среднего риска}
+		Алгоритм $a(x)$ разбивает $\mathbb{X}$ на непересекающиеся области $A_y = \{x \in \mathbb{X} | a(x) = y \}$
+		
+		\vspace{10pt}
+		
+		Каждой паре $(y, s) \in (\mathbb{Y} \times \mathbb{Y})$ соответствует величина потери $\lambda_{ys}$ при классификации объекта класса $y$ к классу $s$, $\lambda_{yy} = 0$ и $\lambda_{ys} > 0$ при $y \ne s$
+		
+		\vspace{10pt}
+		
+		\textbf{Функционал среднего риска}:
+		
+		 \[
+		 R(a) = \sum_{y \in \mathbb{Y}} \sum_{s \in \mathbb{Y}}
+		 \lambda_{ys} P_y P(A_s | y)
+		 \]
+		 
+		 где $P(A_s | y) = \int_{A_s} p_y(x) dx$ - вероятность отнесения к классу $s$ объекта класса $y$.	 
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Оптимальное байесовское решающее правило}
+		% теорема
+		Если известны априорные вероятности $P_y$ и функции правдоподобия $p_y(x)$, то минимум среднего риска $R(a)$ достигается алгоритмом
+		
+		\[
+		a(x) = \arg \min_{y \in \mathbb{Y}} \sum_{y \in \mathbb{Y}} \lambda_{ys} P_y p_y(x)
+		\]
+		
+		\vspace{15pt}
+		
+		Если предположить что потери от ошибочной классификации зависят только от истинного класса объекта, т.е. $\lambda_{ys} = \lambda_{y}$, то алгоритм называется \textbf{Байесовским решающим правило}:
+		
+		\[
+		a(x) = \arg \max_{y \in \mathbb{Y}} \lambda_{y} P_y p_y(x)
+		\]
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Апостериорные вероятности}
+		Вероятность $P(y | x)$ - называется \textbf{апостериорной вероятностью} (posterior).
+		
+		\vspace{10pt}
+		
+		Зная $p_y(x)$ и $P_y$, то по формуле Байеса:
+		
+		\[
+		P(y | x) = 
+		\frac{p(x, y)}{p(x)} =
+		\frac{p_y(x) P_y}{\sum_{s \in \mathbb{Y}} p_s(x) P_s}
+		\]
+		
+		\vspace{15pt}
+		
+		Величина ожидаемых потерь на объекте $x$:
+		
+		\[
+		R(x) =
+		\sum_{y \in \mathbb{Y}} \lambda_{y} P(y | x)
+		\]
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Принцип максимума апостериорной вероятности}
+		Оптимальный байесовский классификатор через апостериорные вероятности:
+		
+		\[
+		a(x) = \arg \max_{y \in \mathbb{Y}} \lambda_{y} P(y | x)
+		\]
+		
+		\vspace{15pt}
+		
+		Если классы равнозначны ($\lambda_{y} = \lambda_{s} \forall y, s \in \mathbb{Y}$), то байесовское решающее правило называют \textbf{принципом максимума апостериорной вероятности}.
+		
+		\vspace{15pt}
+		
+		В случае равновероятных (сбалансированных) классов ($P_y = \frac{1}{|\mathbb{Y}|}$), объект $x$ просто относится к классу с наибольшим значением плотности $p_y(x)$.
+		
+	\end{frame}
+	
+	\subsection{Параметрическое восстановление плотности}
+	
+	\begin{frame}
+		\frametitle{Параметрический подход}
+		Имеется выборка $X = (x_1, ..., x_{\ell}) \in \mathbb{X}$. Предполагается, что плотность, порождающая данные, известна \textbf{с точностью до параметра}, $p(x) = \phi(x; \theta)$. Подбор параметров $\theta$ приводится по выборке $X$ с помощью \textbf{метода максимального правдоподобия}.
+		
+		\vspace{15pt}
+		
+		\textbf{Нормальный дискриминантный анализ} - случай байесовской классифицакии в предположении о нормальном распределениии всех классов, $p_y(x) \sim N(\mu_y, \sigma_y^2), y \in \mathbb{Y}$.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{}
+	\end{frame}
+	
+	\section{Линейные методы}
+	
+	
+\end{document}
