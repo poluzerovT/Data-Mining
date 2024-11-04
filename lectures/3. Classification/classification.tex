@@ -19,6 +19,11 @@
 \usepackage{algpseudocode}
 % \usepackage{algorithmic}
 
+% math
+\usepackage{amsmath}
+\DeclareMathOperator{\sign}{sign}
+
+
 \title[Классификация]{Лекция 3. Классификация}
 \subtitle{Основы интеллектуального анализа данных}
 \author{Полузёров Т. Д.}
@@ -140,6 +145,9 @@
 		
 	\end{frame}
 	
+	\subsection{Непараметрическое восстановление плотности}
+	
+	
 	\subsection{Параметрическое восстановление плотности}
 	
 	\begin{frame}
@@ -152,10 +160,235 @@
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{}
+		\frametitle{Квадратичный дискриминант}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Байесовский нормальный классификатор}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Линейный дискриминант Фишера}
 	\end{frame}
 	
 	\section{Линейные методы}
+	\subsection{Оценка сверху эмперического риска}
 	
+	\begin{frame}
+		\frametitle{Бинарная классификация}
+		Рассмотрим задачу бинарной классификации, $X=(x_1, ..., x_{\ell}) \in \mathbb{X}, Y \in \mathbb{Y} = \{-1, 1\}$
+		
+		\vspace{5pt}
+		
+		Функцию $a(x, \theta) = \sign f(x, \theta)$ будем называть \textbf{дискриминантной функцией}.
+		
+		\vspace{5pt}
+		
+		Если $f(x, \theta) > 0$, то $x$ относится к классу $+1$, 
+		$f(x, \theta) < 0$ то $-1$. 
+		
+		\vspace{5pt}
+		
+		А множество точек $\{x | f(x, \theta) = 0\}$ - \textbf{разделяющая поверхность}.
+		
+		\vspace{5pt}
+		
+		Величина $M_i(\theta) = y_i f(x_i, \theta)$ - \textbf{отступ} (margin) классификатора $a(x, \theta) = \sign f(x, \theta)$ относительно объекта $x_i$.
+		
+		\vspace{5pt}
+		
+		Если $M_i(\theta) < 0$ то алгоритм $a$ допускает ошибку на объекте $x_i$. \textbf{Чем больше} $M_i(\theta)$ \textbf{тем правильнее} и надежнее классификация.  
+	\end{frame} 
+	
+	\begin{frame}
+		\frametitle{Функция потерь}
+		Требуется подобрать параметры $\theta$ при которых классификатор $a$ допускает как можно меньше ошибок:
+		
+		\[
+		Q(a, X) = \frac{1}{\ell} \sum_{i=1}^{\ell} [M_i(\theta) < 0] \rightarrow \min_{\theta}
+		\]
+		
+		Однако в таком виде $Q$ - кусочно постоянная функция
+		
+		\vspace{15pt}
+		
+		Идея - мажорирование (оценка сверху) индикатора ошибки $[M_i(\theta) < 0]$ с помощью "удобной" функцией потерь $\mathcal{L}(M_i)$:
+		
+		\[
+		Q(a, X) = \frac{1}{\ell} \sum_{i=1}^{\ell} [M_i(\theta) < 0]
+		<=
+		\widetilde{Q}(a, X) = \frac{1}{\ell} \sum_{i=1}^{\ell} \mathcal{L}(M_i(\theta))
+		\]
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Популярные функции потерь}
+		\begin{enumerate}
+			\item $[M < 0]$ - индикатор ошибки
+			\item $(1 - M)^2$ - квадратичная
+			\item $(1 - M)_{+}$ - кусочно линейная
+			\item $\frac{2}{1 + e^M}$ - сигмоидная
+			\item $\log_2(1 + e^{-M})$ - логистическая
+			\item $e^{-M}$ - экспоненциальная
+		\end{enumerate}
+		%\includegraphics{img/loss_funcs.png}	
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Функция потерь и совместное распределение}
+		Пусть множество $(\mathbb{X} \times \mathbb{Y})$ - вероятностное пространосво. Имея выборку $(X, Y)$ и предполагаемый вид совместной плотности $p(x, y; \theta)$, применим метод максимального правдоподобия
+		
+		\[
+		L(\theta) = \prod_{i=1}^{\ell} p(x_i, y_i; \theta) \rightarrow \max_{\theta}
+		\]
+		
+		\[
+		\ln L = \sum_{i=1}^{\ell} \ln p(x_i, y_i; \theta) \rightarrow \max_{\theta}
+		\]
+		
+		\[
+		- \ln p(x_i, y_i; \theta) = \mathcal{L}(y_i f(x_i, \theta))
+		\]
+		
+		По виду плотности $p(x, y; \theta)$ восстанавливается $f$ и $\mathcal{L}$. И обратно, используя некоторые разделяющую поверхность и функцию потерь - предполагаем определенное распределение в данных.
+	\end{frame}
+	
+	
+	\begin{frame}
+		\frametitle{Линейная модель}
+		
+		Случай $f(x, \omega) = \langle x, \omega \rangle$ - класс линейных моделей классификации.
+		
+		\[
+		a(x, \omega) = \sign \langle x, \omega \rangle
+		\]
+		
+		Разделяющая поверхность $\sign \langle x, \omega \rangle = 0$ является гиперплосткостью в $\mathbb{R}^{n}$. Причем объекты по одну сторону от гиперплосткости относятся к одному классу, по другую - к другому.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Метод обучения}
+		Метод минимизации мажорированного эмперического риска 
+		
+		\[
+		\widetilde{Q}(a, X) = \sum_{i=1}^{\ell} \mathcal{L}(\langle x_i, \omega \rangle y_i) \rightarrow \min_{\omega}
+		\]
+		
+		Необходимое условие минимума:
+		\[
+		\frac{\partial Q}{\partial \omega} = \sum_{i=1}^{\ell}  x_i y_i \mathcal{L}^{'}(\langle x_i, \omega \rangle y_i) = 0
+		\]
+	\end{frame}
+	
+	\subsection{Логистическая регрессия}
+	
+	\begin{frame}
+		\frametitle{Логистическая регрессия}
+		Логистическая регрессия - линеный алгоритм бинарной классификации.
+		
+		При достаточно сильных свойствах обладает свойствами:
+		\begin{itemize}
+			\item оптимальный байесовский классификатор
+			\item однозначно определена функция потерь
+			\item возможность оценивать вероятности классов
+		\end{itemize}
+		
+		Пусть $(\mathbb{X}\times \mathbb{Y}) = (\mathbb{R}^{n} \times \{-1, 1\})$ - вероятностное пространтсво с плотностью $p(x, y)$. Выборка $(X, Y)$ получена из этого распределения.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Экспонентный класс распределений}
+		Плотность $p(x), x \in \mathbb{R}^{n}$ называется экспонентной, если
+		\[
+			p(x) = \exp(c(\delta) \langle \theta, x \rangle + b(\delta, \theta) + d(x, \delta))
+		\]
+		 где $\theta$ -параметр сдвига, $\delta$ - масштаба, $b, c, d$ - произвольные числовые функции.
+		 
+		 \vspace{15pt}
+		 
+		 Принадлежат к классу экспонентных:
+		 \begin{itemize}
+		 	\item Равномерное, Нормальное, Гамма
+		 	\item Гипергеометрическое, Пуассоновское, Бернулли
+		 	\item и другие
+		 \end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Обоснование линейной модели}
+		\[a(x) = \sign(\lambda_+ P(+1 | x) - \lambda_- P(-1 | x)) =
+		\sign(\frac{P(+1 | x)}{P(-1 | x)} - \frac{\lambda_-}{\lambda_+})
+		\]
+		
+		\textbf{Если} функции правдоподобия $p(x | y) $ принадлежат экспонентному классу, причем параметры $d$ и $\delta$ одинаковы, а отличаются только параметры сдвига $\theta$, 
+		
+		\textbf{то}:
+		\begin{enumerate}
+			\item байесовский классификатор является линейным: $a(x) = \sign \langle \omega, x \rangle$
+			\item апостериорная вероятность $p(y | x) = \sigma(\langle \omega, x \rangle y)$
+		\end{enumerate}
+		
+		где $\sigma(z) = \frac{1}{1 + e^{-z}}$ - сигмоидная функция, $\sigma(-z) = 1 - \sigma(z)$
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Модель оценки вероятностей}
+		Построим модель которая оценивает не сами метки классов, а \textbf{вероятности} принадлежности к ним.
+		
+		\[
+		a(x, \omega) = P(+1 | x) = \sigma(\langle w, x \rangle)
+		\]
+		
+		Другими словами, в каждой точке $x$ величина $y \sim Bernoulli(\sigma(\langle w, x \rangle))$
+		
+		\vspace{15pt}
+		
+		Задача классификации решается путем выбора порога $t \in [0, 1]$. И тогда итоговый классификатор имеет вид:
+		
+		\[
+			b(x, t) = \sign (a(x, \omega) - t)
+		\]
+		
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Метод максимального правдоподобия}
+		С учетом вероятностной постановки задачи, воспользуемся \textbf{методом максимального правдоподобия}:
+		
+		\[
+		L(\omega) = \prod_{i=1}^{\ell} p(y_i | x_i) = 
+		\prod_{i=1}^{\ell} \sigma(\langle w, x_i \rangle y_i)
+		\rightarrow \max_{\omega}
+		\]
+		
+		\[
+			\ln L(\omega) 
+			= \sum_{i=1}^{\ell} \ln \sigma(\langle w, x_i \rangle y_i)
+			=
+		\]
+		\[
+		= 
+		- \sum_{i=1}^{\ell} \ln(1 + e^{-y_i \langle w, x \rangle}) \rightarrow \max_{\omega}
+		\]
+		
+		-совпадает с логистической функция потерь 
+		\[
+		Q(\omega) = \sum_{i=1}^{\ell} \ln (1 + e^{-M_i}) \rightarrow \min_{\omega}
+		\]
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Решение оптимизационной задачи}
+		Имеем
+		
+		\[
+		Q(\omega) = \sum_{i=1}^{\ell} \ln (1 + e^{-\langle w, x \rangle}) \rightarrow \min_{\omega}
+		\]
+		
+		Аналитического решения нет, поэтому применяются градиентные методы
+		\[
+		\nabla Q(\omega) = \sum_{i=1}^{\ell} x_i y_i \sigma(- \langle w, x_i \rangle)
+		\]
+	\end{frame}
 	
 \end{document}
