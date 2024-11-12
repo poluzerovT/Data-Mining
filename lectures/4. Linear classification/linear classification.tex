@@ -8,6 +8,7 @@
 
 % insert images
 \usepackage{wrapfig}
+\usepackage{graphicx}
 
 % declare operator
 \DeclareMathOperator*{\argmin}{argmin} % thin space, limits underneath in displays
@@ -20,11 +21,12 @@
 % \usepackage{algorithmic}
 
 % math
+\newtheorem{rustheorem}{Теорема}
 \usepackage{amsmath}
 \DeclareMathOperator{\sign}{sign}
 \DeclareMathOperator{\K}{K}
 
-\title[Классификация]{Лекция 3. Классификация}
+\title[Линейные методы классификации]{Лекция 4. Линейные методы классификации}
 \subtitle{Основы интеллектуального анализа данных}
 \author{Полузёров Т. Д.}
 \institute{БГУ ФПМИ}
@@ -41,9 +43,9 @@
 		\tableofcontents	
 	\end{center}
 	
-	\section{Линейные методы}
+	\section{Общие идеи}
 	
-	\subsection{Оценка сверху эмперического риска}
+	\subsection{Постановка задачи}
 	
 	\begin{frame}
 		\frametitle{Бинарная классификация}
@@ -92,6 +94,8 @@
 		\textbf{Чем больше} $M_i(\theta)$ \textbf{тем правильнее} и надежнее классификация.  
 	\end{frame}
 	
+	\subsection{Оценка сверху эмперического риска}
+	
 	\begin{frame}
 		\frametitle{Функция потерь}
 		Требуется подобрать параметры $\theta$ при которых классификатор $a$ допускает как можно меньше ошибок:
@@ -115,15 +119,23 @@
 	
 	\begin{frame}
 		\frametitle{Популярные функции потерь}
-		\begin{enumerate}
-			\item $[M < 0]$ - индикатор ошибки
-			\item $(1 - M)^2$ - квадратичная
-			\item $(1 - M)_{+}$ - кусочно линейная
-			\item $\frac{2}{1 + e^M}$ - сигмоидная
-			\item $\log_2(1 + e^{-M})$ - логистическая
-			\item $e^{-M}$ - экспоненциальная
-		\end{enumerate}
-		%\includegraphics{img/loss_funcs.png}	
+		
+		\begin{columns}
+			\begin{column}{0.4\textwidth}
+				\begin{enumerate}
+					\item $[M < 0]$ - индикатор ошибки
+					\item $(1 - M)^2$ - квадратичная
+					\item $(1 - M)_{+}$ - кусочно линейная
+					\item $\frac{2}{1 + e^M}$ - сигмоидная
+					\item $\log_2(1 + e^{-M})$ - логистическая
+					\item $e^{-M}$ - экспоненциальная
+				\end{enumerate}
+			\end{column}
+			\begin{column}{0.6\textwidth}
+				\centering
+				\includegraphics[width=1.15\textwidth]{img/loss_func.png}	
+			\end{column}
+		\end{columns}
 	\end{frame}
 	
 	\begin{frame}
@@ -145,6 +157,8 @@
 		По виду плотности $p(x, y; \theta)$ восстанавливается $f$ и $\mathcal{L}$. И обратно, используя некоторые разделяющую поверхность и функцию потерь - предполагаем определенное распределение в данных.
 	\end{frame}
 	
+	\subsection{Линейная модель}
+	
 	\begin{frame}
 		\frametitle{Линейная модель}
 		
@@ -155,6 +169,12 @@
 		\]
 		
 		Разделяющая поверхность $\sign \langle x, \omega \rangle = 0$ является гиперплосткостью в $\mathbb{R}^{n}$. Причем объекты по одну сторону от гиперплосткости относятся к одному классу, по другую - к другому.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Модель нейрона МакКаллока-Питтса}
+				
+		\includegraphics[width=\textwidth]{img/mk_pits.jpg}
 	\end{frame}
 	
 	\begin{frame}
@@ -171,11 +191,13 @@
 		\]
 	\end{frame}
 	
-	\subsection{Логистическая регрессия}
+	\section{Логистическая регрессия}
+	
+	\subsection{Обоснование модели}
 	
 	\begin{frame}
 		\frametitle{Логистическая регрессия}
-		Логистическая регрессия - линеный алгоритм бинарной классификации.
+		Логистическая регрессия (Logistic regression) - линейный алгоритм бинарной классификации.
 		
 		\vspace{15pt}
 		
@@ -211,10 +233,8 @@
 	
 	\begin{frame}
 		\frametitle{Обоснование линейной модели}
-		\[a(x) = \sign(\lambda_+ P(+1 | x) - \lambda_- P(-1 | x)) =
-		\sign(\frac{P(+1 | x)}{P(-1 | x)} - \frac{\lambda_-}{\lambda_+})
-		\]
 		
+		\begin{rustheorem}
 		\textbf{Если} функции правдоподобия $p(x | y) $ принадлежат экспонентному классу, причем параметры $d$ и $\delta$ одинаковы, а отличаются только параметры сдвига $\theta$, 
 		
 		\textbf{то}:
@@ -224,6 +244,7 @@
 		\end{enumerate}
 		
 		где $\sigma(z) = \frac{1}{1 + e^{-z}}$ - сигмоидная функция, $\sigma(-z) = 1 - \sigma(z)$
+		\end{rustheorem}	
 	\end{frame}
 	
 	\begin{frame}
@@ -245,6 +266,8 @@
 		\]
 		
 	\end{frame}
+	
+	\subsection{Поиск решения}
 	
 	\begin{frame}
 		\frametitle{Метод максимального правдоподобия}
@@ -286,13 +309,9 @@
 		\]
 	\end{frame}
 	
-	\subsection{Идея нейронных сетей}
+	\section{Метод опорных векторов}
 	
-	\begin{frame}
-		\frametitle{title}
-	\end{frame}
-	
-	\subsection{Метод опорных векторов}
+	\subsection{Линейно разделимая выборка}
 	
 	\begin{frame}
 		\frametitle{Случай линейно разделимой выборки}
@@ -314,17 +333,22 @@
 		\frametitle{Максимизация отступа}
 		Среди всех подходящих разделяющих гиперплоскостей выберем ту, которая максимально удалена от "граничных" объектов.
 		
-		\vspace{15pt}
+		\vspace{5pt}
+		
+		\begin{wrapfigure}{r}{0.6\textwidth}
+			\centering
+			\includegraphics[width=0.4\textwidth]{img/svm.png}
+		\end{wrapfigure}
 		
 		\[
 		\begin{cases}
-			||w|| \rightarrow \min \\
+			||\omega||^2 \rightarrow \min \\
 			M_i(\omega) \ge 1, &  i=1, ..., \ell
 		\end{cases}
 		\]
-		
-		\includegraphics[width=0.5\textwidth]{img/svm.png}
 	\end{frame}
+	
+	\subsection{Линейно неразделимая выборка}
 	
 	\begin{frame}
 		\frametitle{Линейно неразделимая выборка}
@@ -333,7 +357,7 @@
 		\[
 		\begin{cases}
 			\frac{1}{2}||w||^2 + C \sum_{i=1}^{\ell} \xi_i \rightarrow \min \\
-			M_i(\omega) \ge 1 - \xi_i, &  i=1, ..., \ell \\
+			M_i(\omega) \ge 1 - \xi_i,  i=1, ..., \ell \\
 			\xi_i \ge 0, i=1, ..., \ell
 		\end{cases}
 		\]
@@ -428,6 +452,8 @@
 		\]
 	\end{frame}
 	
+	\subsection{Трюк с ядром}
+	
 	\begin{frame}
 		\frametitle{Трюк с ядром}
 		Идея состоит в переходе от исходного призакового пространства $\mathbb{X}$ в другое $\mathbb{H}$ где, быть может, выборка является линейно разделимой, посредством $\psi: \mathbb{X} \rightarrow \mathbb{H}$. 
@@ -437,4 +463,14 @@
 		\includegraphics[width=1\textwidth]{img/kernel_trick.png}
 	\end{frame}
 	
+	\begin{frame}
+		\frametitle{Резюме}
+		
+		\begin{itemize}
+			\item Линейный классификатор - модель нейрона
+			\item Аппроксимация пороговой функции потерь
+			\item Оценка вероятностей с помощью логистической регрессии
+			\item SVM - очень сильный алгоритм классификации благодаря трюку с ядром
+		\end{itemize}
+	\end{frame}
 \end{document}
