@@ -125,9 +125,9 @@
 				\begin{enumerate}
 					\item $[M < 0]$ - индикатор ошибки
 					\item $(1 - M)^2$ - квадратичная
-					\item $(1 - M)_{+}$ - кусочно линейная
+					\item $(1 - M)_{+}$ - \textbf{кусочно линейная (Hinge loss)}
 					\item $\frac{2}{1 + e^M}$ - сигмоидная
-					\item $\log_2(1 + e^{-M})$ - логистическая
+					\item $\log_2(1 + e^{-M})$ - \textbf{логистическая}
 					\item $e^{-M}$ - экспоненциальная
 				\end{enumerate}
 			\end{column}
@@ -239,7 +239,7 @@
 		
 		\textbf{то}:
 		\begin{enumerate}
-			\item байесовский классификатор является линейным: $a(x) = \sign \langle \omega, x \rangle$
+			\item оптимальный байесовский классификатор является линейным%: $a(x) = \sign \langle \omega, x \rangle$
 			\item апостериорная вероятность $p(y | x) = \sigma(\langle \omega, x \rangle y)$
 		\end{enumerate}
 		
@@ -252,10 +252,10 @@
 		Построим модель которая оценивает не сами метки классов, а \textbf{вероятности} принадлежности к ним.
 		
 		\[
-		b(x, \omega) = P(+1 | x) = \sigma(\langle w, x \rangle)
+		b(x, \omega) = P(+1 | x) = \sigma(\langle \omega, x \rangle)
 		\]
 		
-		Другими словами, в каждой точке $x$ величина $y \sim Bernoulli(\sigma(\langle w, x \rangle))$
+		Другими словами, в каждой точке $x$ величина $y \sim Bernoulli(\sigma(\langle \omega, x \rangle))$
 		
 		\vspace{15pt}
 		
@@ -275,18 +275,18 @@
 		
 		\[
 		L(\omega) = \prod_{i=1}^{\ell} p(y_i | x_i) = 
-		\prod_{i=1}^{\ell} \sigma(\langle w, x_i \rangle y_i)
+		\prod_{i=1}^{\ell} \sigma(\langle \omega, x_i \rangle y_i)
 		\rightarrow \max_{\omega}
 		\]
 		
 		\[
 		\ln L(\omega) 
-		= \sum_{i=1}^{\ell} \ln \sigma(\langle w, x_i \rangle y_i)
+		= \sum_{i=1}^{\ell} \ln \sigma(\langle \omega, x_i \rangle y_i)
 		=
 		\]
 		\[
 		= 
-		- \sum_{i=1}^{\ell} \ln(1 + e^{-y_i \langle w, x \rangle}) \rightarrow \max_{\omega}
+		- \sum_{i=1}^{\ell} \ln(1 + e^{-y_i \langle \omega, x \rangle}) \rightarrow \max_{\omega}
 		\]
 		
 		-совпадает с логистической функция потерь 
@@ -300,13 +300,31 @@
 		Имеем
 		
 		\[
-		Q(\omega) = \sum_{i=1}^{\ell} \ln (1 + e^{-\langle w, x \rangle}) \rightarrow \min_{\omega}
+		Q(\omega) = \sum_{i=1}^{\ell} \ln (1 + e^{- y_i \langle \omega, x \rangle}) \rightarrow \min_{\omega}
 		\]
 		
 		Аналитического решения нет, поэтому применяются градиентные методы
 		\[
-		\nabla Q(\omega) = \sum_{i=1}^{\ell} x_i y_i \sigma(- \langle w, x_i \rangle)
+		\nabla Q(\omega) = \sum_{i=1}^{\ell} x_i y_i \sigma(- \langle \omega, x_i \rangle)
 		\]
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Логистическая регрессия}
+		Получена модель \textbf{логистической регрессии} $b: \mathbb{X} \rightarrow [0, 1]$
+		\[
+		b(x) = \sigma(\langle x, \omega \rangle)
+		\]
+		При обучении используется логистическая функция потерь
+		\[
+		\mathcal{L}(y, a) = \ln(1 + e^{-y_i \langle \omega, x \rangle})
+		\]
+		
+		Выбирая порог $t \in [0, 1]$ получаем классификатор
+		\[
+		a(x) = [b(x) > t]
+		\]
+		
 	\end{frame}
 	
 	\section{Метод опорных векторов}
@@ -318,7 +336,7 @@
 		
 		По выборке $(X, Y)$ будем строить классификатор вида
 		\[
-		a(x, \omega) = \langle x, \omega \rangle
+		a(x, \omega) = \langle x, \omega \rangle - \omega_0
 		\]
 		
 		и предположим, что выборка $(X, Y)$ линейна разделима. То есть найдутся такие веса $\omega^{*}$, что 
@@ -335,17 +353,28 @@
 		
 		\vspace{5pt}
 		
-		\begin{wrapfigure}{r}{0.6\textwidth}
-			\centering
-			\includegraphics[width=0.4\textwidth]{img/svm.png}
-		\end{wrapfigure}
-		
-		\[
-		\begin{cases}
-			||\omega||^2 \rightarrow \min \\
-			M_i(\omega) \ge 1, &  i=1, ..., \ell
-		\end{cases}
-		\]
+		\begin{columns}
+			\begin{column}{0.4\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{img/svm.png}		
+			\end{column}
+			\begin{column}{0.6\textwidth}
+				В силу линейной разделимости
+				
+				$\exists \omega, \omega_0 : \{x: -1 < \langle \omega, x \rangle - \omega_0 < 1\}$
+				-~полоса между классами.
+				
+				\vspace{5pt}
+				
+				Выберем наиболее широкую из всех доступных
+				\[
+				\begin{cases}
+					||\omega||^2 \rightarrow \min \\
+					M_i(\omega) \ge 1, &  i=1, ..., \ell
+				\end{cases}
+				\]
+			\end{column}
+		\end{columns}
 	\end{frame}
 	
 	\subsection{Линейно неразделимая выборка}
@@ -353,43 +382,57 @@
 	\begin{frame}
 		\frametitle{Линейно неразделимая выборка}
 		В случае линейно неразделимой выборки смягчим требования
-		
 		\[
 		\begin{cases}
-			\frac{1}{2}||w||^2 + C \sum_{i=1}^{\ell} \xi_i \rightarrow \min \\
-			M_i(\omega) \ge 1 - \xi_i,  i=1, ..., \ell \\
-			\xi_i \ge 0, i=1, ..., \ell
+			\frac{1}{2}||\omega||^2 + \alert{C \sum_{i=1}^{\ell} \xi_i} \rightarrow \min \\
+			M_i(\omega) \ge 1 - \alert{\xi_i},  i=1, ..., \ell \\
+			\alert{\xi_i \ge 0}, i=1, ..., \ell
 		\end{cases}
 		\]
 		
-		Эту задачу можно упростить до:
-		
+		Требование можно упростить
 		\[
-		\begin{cases}
-			\xi_i \ge \max(0, 1 - M_i(\omega)) \\
-			\sum_{i=1}^{\ell} \xi_i \rightarrow \min
-			
-		\end{cases}
+			\begin{cases}
+				\xi_i \ge 0\\
+				\xi_i \ge 1 - M_i(\omega)\\
+				\sum_{i=1}^{\ell} \xi_i \rightarrow \min
+			\end{cases}	
+			&
+			\Rightarrow
+			&
+			\xi_i = (1 - M_i(\omega))_{+}
 		\]
-		
+
 		Итог - задача безусловной оптимизации
 		\[
-		\frac{1}{2}||w||^2 + C \sum_{i=1}^{\ell} (1 - M_i(\omega))_{+} \rightarrow \min_{\omega}
+		\frac{1}{2}||\omega||^2 + C \sum_{i=1}^{\ell} (1 - M_i(\omega))_{+} \rightarrow \min_{\omega}
 		\]
 		где $C$ - гиперпарамер алгоритма
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Метод опорных векторов}
+		Получен \textbf{метод опорных векторов} (Support Vector Machine, SVM), где
+		\[
+		a(x) = \sign \left( \langle x, \omega \rangle \right)
+		\]
+		\[
+		\mathcal{L}(y, a) = (1 - M_i(\omega))_{+}
+		\]
+		Т.е. линейный классификатор с квадратичной регуляризацией, обученный по функции потерь Hinge loss
 	\end{frame}
 	
 	\begin{frame}
 		\frametitle{Двойственная задача}
 		По теореме Каруша-Куна-Такера, исходная задача эквивалентна двойственной задаче поиска седловой точки функции Лагранжа
 		\[
-		\mathcal{L}(\omega, \lambda, \eta) = 
+		\mathcal{L}(\omega, \alert{\lambda, \eta}) = 
 		\frac{1}{2} ||\omega||^2 
-		- \sum_{i=1}^{\ell} \lambda_i (M_i(\omega) - 1)
-		- \sum_{i=1}^{\ell} \xi_i (\lambda_i + \eta_i - C)
+		- \sum_{i=1}^{\ell} \alert{\lambda_i} (M_i(\omega) - 1)
+		- \sum_{i=1}^{\ell} \xi_i (\alert{\lambda_i} + \alert{\eta_i} - C)
 		\]
 		
-		Приравнивая частные производные к нулю
+		Приравнивая частные производные $\mathcal{L}$ по $\omega, \omega_0, \xi$ к нулю
 		\[
 		\begin{cases}
 			\omega = \sum_{i=1}^{\ell} \lambda_i y_i x_i \\
@@ -423,8 +466,8 @@
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Метод опорных векторов}
-		Лагранжиан упрощается до
+		\frametitle{Альтернативный вид классификатора}
+		Подставляя ограничения в лагранжиан, переходим к двойственной задаче с двойственными переменными $\lambda$
 		\[
 		\begin{cases}
 			- \sum_{i=1}^{\ell} \lambda_i + 
@@ -438,11 +481,11 @@
 		\end{cases}
 		\]
 		
-		 Откуда параметры классификатора равны
+		 Получив решение $\lambda$, параметры классификатора равны
 		\[
 		\begin{cases}
 			\omega = \sum_{i=1}^{\ell} \lambda_i y_i x_i \\
-			\omega_0 = \langle x, \omega \rangle - y_i, & \forall i: \lambda_i > 0, M_i = 1
+			\omega_0 = \langle x_i, \omega \rangle - y_i, & \forall i: \lambda_i > 0, M_i = 1
 		\end{cases}
 		\]
 		
