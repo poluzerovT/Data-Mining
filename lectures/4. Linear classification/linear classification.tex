@@ -76,6 +76,11 @@
 	\end{frame} 
 	
 	\begin{frame}
+		\frametitle{Пример}
+		\includegraphics[width=1\textwidth]{img/bin_class}
+	\end{frame}
+
+	\begin{frame}
 		\frametitle{Отступ}
 		
 		Величина 
@@ -85,13 +90,19 @@
 		
 		 - \textbf{отступ} (margin) классификатора $a(x, \theta) = \sign f(x, \theta)$ относительно объекта $x_i$.
 		
-		\vspace{15pt}
+		\vspace{5pt}
 		
 		Если $M_i(\theta) < 0$ то алгоритм $a$ допускает ошибку на объекте $x_i$. 
 		
-		\vspace{15pt}
+		%\vspace{15pt}
 		
-		\textbf{Чем больше} $M_i(\theta)$ \textbf{тем правильнее} и надежнее классификация.  
+		%\textbf{Чем больше} $M_i(\theta)$ \textbf{тем правильнее} и надежнее классификация.
+		
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.8\textwidth]{img/margin}  
+		\end{figure}
+		
 	\end{frame}
 	
 	\subsection{Оценка сверху эмперического риска}
@@ -170,12 +181,7 @@
 		
 		Разделяющая поверхность $\sign \langle x, \omega \rangle = 0$ является гиперплосткостью в $\mathbb{R}^{n}$. Причем объекты по одну сторону от гиперплосткости относятся к одному классу, по другую - к другому.
 	\end{frame}
-	
-	\begin{frame}
-		\frametitle{Модель нейрона МакКаллока-Питтса}
-				
-		\includegraphics[width=\textwidth]{img/mk_pits.jpg}
-	\end{frame}
+
 	
 	\begin{frame}
 		\frametitle{Метод обучения}
@@ -189,6 +195,12 @@
 		\[
 		\frac{\partial Q}{\partial \omega} = \sum_{i=1}^{\ell}  x_i y_i \mathcal{L}^{'}(\langle x_i, \omega \rangle y_i) = 0
 		\]
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Модель нейрона МакКаллока-Питтса}
+				
+		\includegraphics[width=\textwidth]{img/mk_pits.jpg}
 	\end{frame}
 	
 	\section{Логистическая регрессия}
@@ -245,6 +257,15 @@
 		
 		где $\sigma(z) = \frac{1}{1 + e^{-z}}$ - сигмоидная функция, $\sigma(-z) = 1 - \sigma(z)$
 		\end{rustheorem}	
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Сигмоидная функция}
+		
+		\begin{figure}
+			\centering
+			\includegraphics[width=1\textwidth]{img/sigmoida}
+		\end{figure}
 	\end{frame}
 	
 	\begin{frame}
@@ -359,7 +380,7 @@
 				\includegraphics[width=\textwidth]{img/svm.png}		
 			\end{column}
 			\begin{column}{0.6\textwidth}
-				В силу линейной разделимости
+				Вследствие линейной разделимости
 				
 				$\exists \omega, \omega_0 : \{x: -1 < \langle \omega, x \rangle - \omega_0 < 1\}$
 				-~полоса между классами.
@@ -408,6 +429,7 @@
 		\frac{1}{2}||\omega||^2 + C \sum_{i=1}^{\ell} (1 - M_i(\omega))_{+} \rightarrow \min_{\omega}
 		\]
 		где $C$ - гиперпарамер алгоритма
+		
 	\end{frame}
 	
 	\begin{frame}
@@ -507,7 +529,19 @@
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Резюме}
+		\begin{columns}
+			\begin{column}{0.5\textwidth}
+				\includegraphics[width=1\textwidth]{img/svm_kernels_1}
+				\includegraphics[width=1\textwidth]{img/svm_kernels_2}
+			\end{column}
+			\begin{column}[t]{0.5\textwidth}
+				\includegraphics[width=1\textwidth]{img/svm_kernels_3}
+			\end{column}			
+		\end{columns}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Заключение}
 		
 		\begin{itemize}
 			\item Линейный классификатор - модель нейрона
