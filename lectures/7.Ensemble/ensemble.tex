@@ -1,7 +1,8 @@
 % presentation
 \documentclass{beamer}
 
-\usetheme{Boadilla}
+% \usetheme{Boadilla}
+\usetheme{Warsaw}
 
 % rus lang
 \usepackage[main=russian,english]{babel}
@@ -17,6 +18,7 @@
 \newcommand{\eps}{\varepsilon}
 
 % math
+\usefonttheme[onlymath]{serif}
 \newtheorem{rustheorem}{Теорема}
 \usepackage{amsmath}
 \DeclareMathOperator{\sign}{sign}
@@ -28,7 +30,7 @@
 \DeclareMathOperator{\V}{\mathbb{V}}
 
 
-\title[Ансамбли]{Лекция 7. Ансамбли}
+\title[Ансамбли]{Лекция 7. Композиции алгоритмов}
 \subtitle{Основы интеллектуального анализа данных}
 \author{Полузёров Т. Д.}
 \institute{БГУ ФПМИ}
@@ -45,11 +47,8 @@
 		\frametitle{Структура лекции}
 		\tableofcontents
 	\end{center}
-    
-	\begin{frame}
-        \frametitle{TEST}
-        \includegraphics{test}
-    \end{frame}
+	
+	\section{Беггинг}
 
 	\begin{frame}
 		\frametitle{Функионал риска}
@@ -82,6 +81,10 @@
 			\item $variance(a) = \E_X [ a(x, X) - \E_x[a(x, X)] ]^2$ --- разброс
 			\item $\sigma^2 = \E_x \E_{\eps} [y(x, \eps) - f(x)]^2$ --- неустранимый шум
 		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\includegraphics[width=1\textwidth]{img/bias_variance_tradeoff.png}	
 	\end{frame}
 
 	\begin{frame}
@@ -251,9 +254,88 @@
 		Однако, алгоритмы стоятся независимо друг от друга и это позволяет распаралеливать построение отдельных деревьев.
 	\end{frame}
 
+	\section{Бустинг}
+
 	\begin{frame}
-		\frametitle{Стекинг}
+		\frametitle{Бустинг}
+		Задана функция потерь $L(a) = (y - a(x))^2$
+
+		Будем строить последовательно линейную композицию
+		\[
+		a(x) = b_1(x) + \dots + b_k(x)
+		\]
+		исходя из следующих соображений.
 		
+		Допустим, на шаге $t-1$  имеем композицию $a_{t - 1}$. Она допускает ошибки
+		$s_{t-1} = y - a_{t-1}$.
+
+		Если дополнить композицию $a_t(x) = a_{t - 1} + s_{t-1}$ --- такой алгоритм решит задачу точно.
+
+		Попробуем строить следующий базовый алгоритм $b_t(x)$ который <<испрвялет>> ошибки, допущенные 
+		предыдущей композицией
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{}
+		 
+		Требуем от добавления алгоритма к композиции
+		\[
+		Q(a_k) < Q(a_{k-1})
+		\]
+
+		Более подробно
+		\[
+		Q(a_k) = \sum_{i=1}^{\ell} \mathcal{L} \left( \sum_{j=1}^{k - 1} b_j(x_i) + b_k(x_i), y_i \right) \rightarrow \min_{b}
+		\]
+
+		\begin{center}
+			$a_0$ --- начальное приближение
+	
+			$a_1 = a_0 + b_1$ 
+			
+			$\cdots$
+
+			$a_t = a_{t-1} + b_t$ 
+		\end{center}
+		Очень похоже на градиентный спуск
+		\[
+		b_t = - \nabla \mathcal{L}  (a_{t-1})
+		\]
+
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{}
+		Будем строить $b_t$, приближающий антиградиент $\mathcal{L}$ в точке $a_{t-1}$.
+
+		\[
+		b_t(x) = \arg \min_{b} \sum_{i=1}^{\ell} (b(x_i) + \nabla \mathcal{L}  (a_{t-1}))^2
+		\]
+
+		В градиентных метод оптимизации строится релаксационная последовательность весов, а в градиентном бустинге ---
+		последовательность композиций.
+
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Градиентный шаг}
+
+		Бывает полезным ввести параметр --- \textbf{темп обучения}
+
+		А именно делать градиентный шаг
+		\[
+		a_t(x) = a_{t-1}(x) + \eta_t b_t(x)
+		\]
+		величиной $\eta_t$.
+
+		Это позволит делать более точную подстройку.
+
+		\vspace{15pt}
+
+		На $t$-м шаге вычислять $\eta_t$ из решения задачи
+		\[
+		\eta_t = \arg \min_{\eta > 0} \sum_{i=1}^{\ell} \mathcal{L} (a_{t-1} + \eta b_t(x_i), y_i)
+		\]
 	\end{frame}
 
 
