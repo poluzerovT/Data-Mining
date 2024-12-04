@@ -13,16 +13,17 @@
 \usepackage{graphicx}
 \graphicspath{{./img/}, {../../plots/}}
 
-% declare operator
-\DeclareMathOperator*{\argmin}{argmin} % thin space, limits underneath in displays
-\newcommand{\at}[2][]{#1|_{#2}}
-\newcommand{\eps}{\varepsilon}
-
 % math
-\usefonttheme[onlymath]{serif}
-\newtheorem{rustheorem}{Теорема}
 \usepackage{amsmath}
 \usepackage{mathtools}
+\usefonttheme[onlymath]{serif}
+\newtheorem{rustheorem}{Теорема}
+
+\newcommand{\at}[2][]{#1|_{#2}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\dd}[2]{\frac{\partial #1}{\partial #2}}
+
+\DeclareMathOperator*{\argmin}{argmin}
 \DeclareMathOperator{\sign}{sign}
 \DeclareMathOperator{\K}{K}
 \DeclareMathOperator{\R}{\mathbb{R}}
@@ -53,6 +54,8 @@
 	\end{center}
 	
 	\section{Общие принципы}
+
+	\subsection{Композиция}
 
 	\begin{frame}
 		\frametitle{Общие идеи}
@@ -98,6 +101,8 @@
 		\end{itemize}	
 	\end{frame}
 
+	\subsection{Агрегирующая функция}
+
 	\begin{frame}
 		\frametitle{Примеры агрегирующих функций}
 		\begin{itemize}
@@ -115,7 +120,6 @@
 			\]
 		\end{itemize}
 	\end{frame}
-
 
 	\section{Беггинг}
 
@@ -401,105 +405,78 @@
 
 	\begin{frame}
 		\frametitle{Градиентный бустинг}
-		Градиентный спуск для скалярной функции $Q(x) \rightarrow \min$.
+		Рассмотрим наиболее общий алгоритм бустинга --- градиентный бустинг. 
+
+		\vspace{15pt}
+
+		Градиентный спуск для скалярной функции $Q(a) \rightarrow \min$ в пространстве ответов на обучающей выборке.
 
 		Строится последовательность точек
 		\[
-		x_t = x_{t-1} - \alpha_t \nabla Q(x_{t-1}) = x_0 + \sum_{i=1}^{t-1} \alpha_i ( - \nabla Q(x_i))
+		a_t = a_{t-1} - \alpha_t \dd{Q}{a} \at[\Big]{a = a_{t-1}}
 		\]
 
 		Схоже с добавлением нового базового алгоритма на каждой итерации.
-		Будем строить композицию, где $b_t$ приближает антиградиент $-\nabla Q$ в точке $a_{t-1}$
+
+		\vspace{15pt}
+		
+		Будем строить композицию, где $b_t$ приближает $\dd{Q}{a}$ в точке $a_{t-1}$
 
 		\[
-		b_t(x) = \arg \max_{b \in B} \sum_{i=1}^{\ell} (b(x_i) + \nabla Q_i(a_{t-1}))^2
+		b_t(x) \approx - \dd{Q}{a} \at[\Big]{a=a_{t-1}}
 		\]
 	\end{frame}
-
 	
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	% \begin{frame}
-	% 	\frametitle{Бустинг}
-	% 	Задана функция потерь $L(a) = (y - a(x))^2$
+	\begin{frame}
+		\frametitle{Приближение антиградиента}
 
-	% 	Будем строить последовательно линейную композицию
-	% 	\[
-	% 	a(x) = b_1(x) + \dots + b_k(x)
-	% 	\]
-	% 	исходя из следующих соображений.
-		
-	% 	Допустим, на шаге $t-1$  имеем композицию $a_{t - 1}$. Она допускает ошибки
-	% 	$s_{t-1} = y - a_{t-1}$.
+		Приближение антиградиента можно сформулиоровать так
 
-	% 	Если дополнить композицию $a_t(x) = a_{t - 1} + s_{t-1}$ --- такой алгоритм решит задачу точно.
+		\[
+		g_{t-1, i} = \left( - \dd{Q}{a}\at[\Big]{a = a_{t-1}} \right)_i
+		\]
+		--- $i$-я компонента градиента, вычисленного в точке $a_{t-1}$ на всех объектах выборки
+		\[
+		b_t(x) = \arg \max_{b \in B} \sum_{i=1}^{\ell} \left( b(x_i) - g_{t-1, i} \right)^2
+		\]
 
-	% 	Попробуем строить следующий базовый алгоритм $b_t(x)$ который <<испрвялет>> ошибки, допущенные 
-	% 	предыдущей композицией
-	% \end{frame}
+		Тоесть $b_t$ решает задачу регрессии, приближая антиградиент функции потерь.
+	\end{frame}
 
-	% \begin{frame}
-	% 	\frametitle{}
-		 
-	% 	Требуем от добавления алгоритма к композиции
-	% 	\[
-	% 	Q(a_k) < Q(a_{k-1})
-	% 	\]
+	\begin{frame}
+		\frametitle{Алгоритм градиентного бустинга}
+		\begin{algorithm}[H]
+			\KwData{
+				обучающая выборка $X^{\ell}$, 
+				}
+			\KwResult{базовые алгоритмы и веса $\alpha_1 b_1, \dots, \alpha_k b_k$}
+			Построить первый алгоритм $b_1(x)$
 
-	% 	Более подробно
-	% 	\[
-	% 	Q(a_k) = \sum_{i=1}^{\ell} \mathcal{L} \left( \sum_{j=1}^{k - 1} b_j(x_i) + b_k(x_i), y_i \right) \rightarrow \min_{b}
-	% 	\]
+			\For{$t = 2, \dots, k$}{
+				Вычислить
+				
+				$g := - \dd{Q}{a}\at{a=a_{t-1}}$
+				
+				Обучить алгоритм $b$: $x \rightarrow g$
+				
+				$b_t := \arg \min_{b} \sum_{j=1}^{\ell} \left( b(x_i) - g_i \right)^2$
+				
+				Подобрать $\alpha_t$ 
+				
+				$\alpha_t := \arg \min_{\alpha > 0} \sum_{j=1}^{\ell} L(a_{t-a} + \alpha b_t(x_j), y_j)$
+			}
+		   \end{algorithm}
+	\end{frame}
 
-	% 	\begin{center}
-	% 		$a_0$ --- начальное приближение
-	
-	% 		$a_1 = a_0 + b_1$ 
-			
-	% 		$\cdots$
+	\begin{frame}
+		\frametitle{Заключение}
 
-	% 		$a_t = a_{t-1} + b_t$ 
-	% 	\end{center}
-	% 	Очень похоже на градиентный спуск
-	% 	\[
-	% 	b_t = - \nabla \mathcal{L}  (a_{t-1})
-	% 	\]
-
-	% \end{frame}
-
-	% \begin{frame}
-	% 	\frametitle{}
-	% 	Будем строить $b_t$, приближающий антиградиент $\mathcal{L}$ в точке $a_{t-1}$.
-
-	% 	\[
-	% 	b_t(x) = \arg \min_{b} \sum_{i=1}^{\ell} (b(x_i) + \nabla \mathcal{L}  (a_{t-1}))^2
-	% 	\]
-
-	% 	В градиентных метод оптимизации строится релаксационная последовательность весов, а в градиентном бустинге ---
-	% 	последовательность композиций.
-
-	% \end{frame}
-
-	% \begin{frame}
-	% 	\frametitle{Градиентный шаг}
-
-	% 	Бывает полезным ввести параметр --- \textbf{темп обучения}
-
-	% 	А именно делать градиентный шаг
-	% 	\[
-	% 	a_t(x) = a_{t-1}(x) + \eta_t b_t(x)
-	% 	\]
-	% 	величиной $\eta_t$.
-
-	% 	Это позволит делать более точную подстройку.
-
-	% 	\vspace{15pt}
-
-	% 	На $t$-м шаге вычислять $\eta_t$ из решения задачи
-	% 	\[
-	% 	\eta_t = \arg \min_{\eta > 0} \sum_{i=1}^{\ell} \mathcal{L} (a_{t-1} + \eta b_t(x_i), y_i)
-	% 	\]
-	% \end{frame}
-
-
+		\begin{itemize}
+			\item Композиции позволяют решать сложные задачи
+			\item Почти всегда базовые алгоритмы --- решающие деревья
+			\item Строить композиции целиком --- сложно. Поэтому базовые алгоритмы строятся по одному
+			\item Построение беггинга можно распаралелить. Бустинга --- нет
+			\item Обобщающая способность бустинга не ухудшается с ростом композиции
+		\end{itemize}
+	\end{frame}
 \end{document}
-
